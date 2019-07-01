@@ -1,0 +1,38 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import numpy as np
+
+lista =[]
+contador1 = 1
+
+#Contador para que percorra todas as 663 paginas de informação
+while contador1 <= 663:
+    
+    #request e parse
+    req = requests.get('https://deckbox.org/games/mtg/cards?p='+str(contador1))
+    soup = BeautifulSoup(req.content, 'html.parser')
+    
+    #pega todos os nomes de carta
+    nome = soup.find_all('td',{'class':'card_name'})
+    
+    #remove a formatação dos nomes
+    for x in nome:
+        lista.append(x.text.replace('\n',''))
+    
+    #Um print para ir acompanhando quanto falta para terminar
+    print("Feito página:",contador1," Faltam: ",663-contador1)
+    contador1 += 1
+contador1=1
+
+#Cria um dataframe com a lista de cartas
+df = pd.DataFrame(lista)
+
+#Cria o arquivo excel
+writer = pd.ExcelWriter('AllMagicCards.xlsx', engine='xlsxwriter')
+
+#Transforma o dataframe em informação no arquivo excel
+df.to_excel(writer,sheet_name='welcome',index=False)
+
+#Salva o arquivo
+writer.save()
